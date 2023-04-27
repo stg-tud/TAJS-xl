@@ -1546,7 +1546,7 @@ public class FunctionBuilder extends DefaultDispatchingParseTreeAuxVisitor<Trans
 
     @Override
     public TranslationResult process(VariableDeclarationListTree tree, AstEnv env) {
-        if (tree.declarationType != TokenType.VAR && tree.declarationType != TokenType.CONST /* TODO: unsound to treat as var, but unlikely to be an issue in practice (GitHub #182) */) {
+        if (tree.declarationType != TokenType.VAR && tree.declarationType != TokenType.CONST  && tree.declarationType != TokenType.LET/* TODO: unsound to treat as var, but unlikely to be an issue in practice (GitHub #182) */) {
             throw new SyntacticSupportNotImplemented(makeSourceLocation(tree) + ": Only var/const declarations supported, " + tree.declarationType + " is not supported");
         }
         return processList(tree.declarations, env.makeStatementLevel(true));

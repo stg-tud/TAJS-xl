@@ -16,6 +16,7 @@
 
 package dk.brics.tajs.analysis;
 
+import dk.brics.tajs.analysis.axa.adaptor.JavaNodeTransfer;
 import dk.brics.tajs.analysis.js.EdgeTransfer;
 import dk.brics.tajs.analysis.js.NodeTransfer;
 import dk.brics.tajs.flowgraph.AbstractNode;
@@ -45,7 +46,7 @@ public class Transfer implements
      * Constructs a new AbstractNodeTransfer object.
      */
     public Transfer() {
-        js_node_transfer = new NodeTransfer();
+        js_node_transfer = new JavaNodeTransfer();
         js_edge_transfer = new EdgeTransfer();
     }
 

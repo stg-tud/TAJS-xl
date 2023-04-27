@@ -22,6 +22,7 @@ import dk.brics.tajs.options.Options;
 import dk.brics.tajs.util.AnalysisException;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -748,6 +749,28 @@ public final class Obj {
         if (internal_value.isMaybeModified() && internal_value.isMaybePresentOrUnknown())
             b.append("\n    [[Value]] = ").append(internal_value);
         return b.toString();
+    }
+
+    public HashMap<String, Value> getModified(){
+        HashMap<String, Value> result = new HashMap<>();
+        for (Entry<PKey, Value> me : sortedEntries(properties, new PKey.Comparator())) {
+            Value v = me.getValue();
+            if (me.getKey().equals(StringPKey.__PROTO__)) {
+                continue;
+            }
+            if (v.isMaybeModified() && v.isMaybePresentOrUnknown())
+                result.put(me.getKey().toStringEscaped(), v);
+        }
+        if ((default_numeric_property.isMaybeModified()) && default_numeric_property.isMaybePresentOrUnknown())
+            result.put("[[DefaultNumeric]]", default_numeric_property);
+        if ((default_other_property.isMaybeModified()) && default_other_property.isMaybePresentOrUnknown())
+            result.put("[[DefaultOther]]", default_other_property);
+        if (internal_prototype.isMaybeModified() && internal_prototype.isMaybePresentOrUnknown())
+            result.put("[[Prototype]]", internal_prototype);
+        if (internal_value.isMaybeModified() && internal_value.isMaybePresentOrUnknown())
+            result.put("[[Value]]", internal_value);
+        return result;
+
     }
 
     /**

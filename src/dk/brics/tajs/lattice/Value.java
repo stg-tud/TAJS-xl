@@ -28,6 +28,7 @@ import dk.brics.tajs.util.Strings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -41,6 +42,23 @@ import static dk.brics.tajs.util.Collections.singleton;
  * Value objects are immutable.
  */
 public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable {
+
+    public boolean isJavaObject(){
+        return this.object_labels!=null && this.object_labels.size()==1 &&
+                this.object_labels.contains(Kind.JAVAOBJECT);
+    }
+
+    public String getJavaName(){
+        Iterator<ObjectLabel> iterator = this.object_labels.iterator();
+        String javaName = "";
+        if(this.object_labels.size()==1)
+        while(iterator.hasNext()){
+            ObjectLabel ol = iterator.next();
+            javaName = ol.getJavaName();
+        }
+        return javaName;
+    }
+
 
     private final static int BOOL_TRUE = 0x00000001; // true
 
@@ -1448,7 +1466,9 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
     public String toString() {
         StringBuilder b = new StringBuilder();
         boolean any = false;
-        if (isUnknown()) {
+        if(isJavaObject()){
+            b.append("Java");
+        } else if (isUnknown()) {
             b.append("?");
             any = true;
         } else if (isPolymorphic()) {

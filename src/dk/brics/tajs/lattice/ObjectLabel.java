@@ -19,6 +19,7 @@ package dk.brics.tajs.lattice;
 import dk.brics.tajs.flowgraph.AbstractNode;
 import dk.brics.tajs.flowgraph.Function;
 import dk.brics.tajs.flowgraph.SourceLocation;
+import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
 import dk.brics.tajs.options.OptionValues;
 import dk.brics.tajs.options.Options;
 import dk.brics.tajs.util.AnalysisException;
@@ -57,7 +58,7 @@ public final class ObjectLabel implements DeepImmutable {
      * Object kinds.
      */
     public enum Kind {
-
+        JAVAOBJECT("JavaObject"),
         OBJECT("Object"),
         FUNCTION("Function"),
         SYMBOL("Symbol"),
@@ -75,13 +76,19 @@ public final class ObjectLabel implements DeepImmutable {
         private String name;
 
         Kind(String name) {
-            this.name = name;
+                this.name = name;
         }
 
         @Override
         public String toString() {
-            return name;
+                return name;
         }
+    }
+
+    public String javaName="";
+
+    public String getJavaName(){
+        return this.javaName;
     }
 
     /**
@@ -284,9 +291,9 @@ public final class ObjectLabel implements DeepImmutable {
      */
     @Override
     public String toString() {
-        if (toString != null) {
+       /* if (toString != null) {
             return toString;
-        }
+        } */
         if (absent_accessor_function == null || this == absent_accessor_function)
             return "<absent getter/setter>";
         StringBuilder b = new StringBuilder();
@@ -302,7 +309,13 @@ public final class ObjectLabel implements DeepImmutable {
         } else if (hostobject != null)
             b.append(hostobject).append('[').append(hostobject.getAPI().getShortName()).append(']');
         else if (node != null) {
+            if(node instanceof JavaNode){
+                b.append(kind).append("#JavaNode:").append(((JavaNode)node).java_definition_site);
+            }else
             b.append(kind).append("#node").append(node.getIndex());
+        }  if(javaName!=null){
+            b.append(":");
+            b.append(javaName);
         }
         b.append(heapContext);
         toString = b.toString();

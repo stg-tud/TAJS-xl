@@ -29,6 +29,11 @@ public class DefaultNodeVisitor implements NodeVisitor, AbstractNodeVisitor {
     }
 
     @Override
+    public void visit(JavaNode n) {
+        // empty
+    }
+
+    @Override
     public void visit(BinaryOperatorNode n) {
         // empty
     }

@@ -39,6 +39,7 @@ import dk.brics.tajs.flowgraph.jsnodes.EventDispatcherNode;
 import dk.brics.tajs.flowgraph.jsnodes.ExceptionalReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.HasNextPropertyNode;
 import dk.brics.tajs.flowgraph.jsnodes.IfNode;
+import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
 import dk.brics.tajs.flowgraph.jsnodes.LoadNode;
 import dk.brics.tajs.flowgraph.jsnodes.NewObjectNode;
 import dk.brics.tajs.flowgraph.jsnodes.NextPropertyNode;
@@ -376,6 +377,11 @@ public class LineValueComputer {
         @Override
         public void visit(EndLoopNode n) {
             // NOOP
+        }
+
+        @Override
+        public void visit(JavaNode n){
+
         }
 
         public Set<Pair<LineValueDescription, Value>> getCollectedValues() {

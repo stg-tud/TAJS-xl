@@ -155,4 +155,9 @@ public interface NodeVisitor {
      * Visits an EndLoopNode.
      */
     void visit(EndLoopNode n);
+
+    /**
+     * Visits a JavaNode.
+     */
+    void visit(JavaNode n);
 }

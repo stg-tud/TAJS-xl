@@ -40,6 +40,7 @@ import dk.brics.tajs.flowgraph.jsnodes.EventDispatcherNode;
 import dk.brics.tajs.flowgraph.jsnodes.ExceptionalReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.HasNextPropertyNode;
 import dk.brics.tajs.flowgraph.jsnodes.IfNode;
+import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
 import dk.brics.tajs.flowgraph.jsnodes.NewObjectNode;
 import dk.brics.tajs.flowgraph.jsnodes.NextPropertyNode;
 import dk.brics.tajs.flowgraph.jsnodes.Node;
@@ -404,6 +405,11 @@ public class AnalysisMonitor implements IAnalysisMonitoring {
             for (BasicBlock b : f.getBlocks())
                 for (AbstractNode n : b.getNodes())
                     n.visitBy((n1) -> n1.visitBy(new NodeVisitor() {
+
+                        @Override
+                        public void visit(JavaNode n){
+
+                        }
 
                         @Override
                         public void visit(NopNode n) {

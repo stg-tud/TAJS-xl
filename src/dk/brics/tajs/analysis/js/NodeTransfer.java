@@ -48,6 +48,7 @@ import dk.brics.tajs.flowgraph.jsnodes.EventDispatcherNode;
 import dk.brics.tajs.flowgraph.jsnodes.ExceptionalReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.HasNextPropertyNode;
 import dk.brics.tajs.flowgraph.jsnodes.IfNode;
+import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
 import dk.brics.tajs.flowgraph.jsnodes.NewObjectNode;
 import dk.brics.tajs.flowgraph.jsnodes.NextPropertyNode;
 import dk.brics.tajs.flowgraph.jsnodes.NodeVisitor;
@@ -102,13 +103,13 @@ import static dk.brics.tajs.util.Collections.singleton;
  */
 public class NodeTransfer implements NodeVisitor {
 
-    private Solver.SolverInterface c;
+    protected Solver.SolverInterface c;
 
-    private PropVarOperations pv;
+    protected PropVarOperations pv;
 
-    private IAnalysisMonitoring m;
+    protected IAnalysisMonitoring m;
 
-    private Filtering filtering;
+    protected Filtering filtering;
 
     /**
      * Constructs a new TransferFunctions object.
@@ -781,7 +782,7 @@ public class NodeTransfer implements NodeVisitor {
             }, c);
         } else { // getPropertyString / getPropertyRegister - like ReadPropertyNode
             Value baseval = c.getState().readRegister(n.getBaseRegister());
-            baseval = UnknownValueResolver.getRealValue(baseval, c.getState());
+                baseval = UnknownValueResolver.getRealValue(baseval, c.getState());
             if (Options.get().isBlendedAnalysisEnabled())
                 baseval = UnknownValueResolver.join(c.getAnalysis().getBlendedAnalysis().getBase(baseval, n, c.getState()), c.getState()); // we do not lose precision by joining here, only using objectlabels later
             Set<ObjectLabel> objlabels = baseval.getObjectLabels(); // the ReadPropertyNode has updated baseval to account for ToObject
@@ -1158,5 +1159,10 @@ public class NodeTransfer implements NodeVisitor {
         if (Options.get().isAsyncEventsEnabled()) {
             AsyncEvents.emit(n, c);
         }
+    }
+
+    @Override
+    public void visit(JavaNode n){
+
     }
 }

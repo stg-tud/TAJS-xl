@@ -45,7 +45,7 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
 
     public boolean isJavaObject(){
         return this.object_labels!=null && this.object_labels.size()==1 &&
-                this.object_labels.contains(Kind.JAVAOBJECT);
+                this.object_labels.iterator().next().getKind()==Kind.JAVAOBJECT;
     }
 
     public String getJavaName(){

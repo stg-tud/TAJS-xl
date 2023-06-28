@@ -49,14 +49,7 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
     }
 
     public String getJavaName(){
-        Iterator<ObjectLabel> iterator = this.object_labels.iterator();
-        String javaName = "";
-        if(this.object_labels.size()==1)
-        while(iterator.hasNext()){
-            ObjectLabel ol = iterator.next();
-            javaName = ol.getJavaName();
-        }
-        return javaName;
+        return this.object_labels.stream().filter(ol->ol.javaName!="").findFirst().get().javaName;
     }
 
 
@@ -1467,7 +1460,7 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
         StringBuilder b = new StringBuilder();
         boolean any = false;
         if(isJavaObject()){
-            b.append("Java");
+            b.append("JavaObject["+getJavaName()+"]");
         } else if (isUnknown()) {
             b.append("?");
             any = true;

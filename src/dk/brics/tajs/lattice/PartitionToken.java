@@ -149,6 +149,8 @@ public abstract class PartitionToken implements DeepImmutable {
             NULL("Null"),
 
             OBJ_OBJECT("OBJ_Object"),
+
+            OBJ_OBJECT_JAVA("OBJ_Object_Java"),
             OBJ_FUNCTION("OBJ_Function"),
             OBJ_SYMBOL("OBJ_Symbol"),
             OBJ_ARRAY("OBJ_Array"),
@@ -171,6 +173,7 @@ public abstract class PartitionToken implements DeepImmutable {
             public static Type getObjectType(ObjectLabel.Kind kind) {
                 switch (kind) {
                     case OBJECT: return OBJ_OBJECT;
+                    case JAVAOBJECT: return OBJ_OBJECT_JAVA;
                     case FUNCTION: return OBJ_FUNCTION;
                     case SYMBOL: return OBJ_SYMBOL;
                     case ARRAY: return OBJ_ARRAY;

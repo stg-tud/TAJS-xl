@@ -26,6 +26,7 @@ import dk.brics.tajs.options.Options;
 import dk.brics.tajs.util.AnalysisException;
 
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 /**
  * Quick-and-dirty tester method for {@link dk.brics.tajs.monitoring.inspector.datacollection.monitors.InspectorMonitor}.
@@ -54,6 +55,6 @@ public class QuickShow {
         Analysis a = Main.init(Options.get(), CompositeMonitor.make(inspector, new AnalysisTimeLimiter(30)), null);
         if (a == null)
             throw new AnalysisException("Error during initialization");
-        Main.run(a);
+        Main.run(a, new HashMap<>());
     }
 }

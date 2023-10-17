@@ -250,7 +250,7 @@ public class FunctionBuilder extends DefaultDispatchingParseTreeAuxVisitor<Trans
      * Produces a usable result register.
      * If the current result register in NO_VALUE, the next free register is returned.
      */
-    private static int getUsableResultRegister(AstEnv env) {
+    public static int getUsableResultRegister(AstEnv env) {
         return env.getResultRegister() == AbstractNode.NO_VALUE ? nextRegister(env) : env.getResultRegister();
     }
 

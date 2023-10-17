@@ -26,6 +26,7 @@ import dk.brics.tajs.monitoring.AnalysisMonitor;
 import dk.brics.tajs.options.Options;
 
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -69,7 +70,7 @@ public class BlendedAnalysisLocationsNeededMinimizer extends AbstractLocationMin
 
         Options.get().getArguments().add(Paths.get(fileToAnalyze));
         Analysis a = Main.init(Options.get(), new AnalysisMonitor(), null);
-        Main.run(a);
+        Main.run(a, new HashMap<>());
     }
 
     @Override

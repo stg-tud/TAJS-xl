@@ -419,6 +419,10 @@ public final class Obj {
         properties.put(propertyname, v);
     }
 
+    public void setWritable() {
+        this.writable = true;
+    }
+
     /**
      * Returns all property names, excluding the defaults and internal properties.
      */
@@ -751,14 +755,24 @@ public final class Obj {
         return b.toString();
     }
 
-    public HashMap<String, Value> getModified(){
+    public Map<PKey, Value> getAllProperties() {
+        Map<PKey, Value> result = new HashMap<>();
+        for (Entry<PKey, Value> me : sortedEntries(properties, new PKey.Comparator())) {
+            Value v = me.getValue();
+                result.put(me.getKey(),v);
+        }
+
+        return result;
+    }
+
+    public HashMap<String, Value> getValues(){
         HashMap<String, Value> result = new HashMap<>();
         for (Entry<PKey, Value> me : sortedEntries(properties, new PKey.Comparator())) {
             Value v = me.getValue();
             if (me.getKey().equals(StringPKey.__PROTO__)) {
                 continue;
             }
-            if (v.isMaybeModified() && v.isMaybePresentOrUnknown())
+            //if (v.isMaybeModified() && v.isMaybePresentOrUnknown())
                 result.put(me.getKey().toStringEscaped(), v);
         }
         if ((default_numeric_property.isMaybeModified()) && default_numeric_property.isMaybePresentOrUnknown())

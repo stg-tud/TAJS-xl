@@ -20,6 +20,7 @@ import dk.brics.tajs.flowgraph.AbstractNode;
 import dk.brics.tajs.flowgraph.Function;
 import dk.brics.tajs.flowgraph.SourceLocation;
 import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
+import dk.brics.tajs.flowgraph.jsnodes.Node;
 import dk.brics.tajs.options.OptionValues;
 import dk.brics.tajs.options.Options;
 import dk.brics.tajs.util.AnalysisException;
@@ -33,7 +34,7 @@ import java.util.Set;
  * Label of abstract object.
  * Immutable.
  */
-public final class ObjectLabel implements DeepImmutable {
+public final class ObjectLabel<ContextType> implements DeepImmutable {
 
     /**
      * Source location used for host functions.
@@ -85,10 +86,30 @@ public final class ObjectLabel implements DeepImmutable {
         }
     }
 
-    public String javaName="";
+    private String javaName="";
 
     public String getJavaName(){
         return this.javaName;
+    }
+
+    public void setJavaName(String name){
+        this.javaName = name;
+    }
+
+    public void setNode(AbstractNode node) {this.node = node;}
+
+    public ObjectLabel<ContextType> cloneWithNode(AbstractNode newNode){
+        return make(hostobject, newNode, function, kind, heapContext, true);
+    }
+
+    private ContextType contextType;
+
+    public void setContextType(ContextType contextType) {
+        this.contextType = contextType;
+    }
+
+    public ContextType getContextType() {
+        return contextType;
     }
 
     /**
@@ -99,7 +120,7 @@ public final class ObjectLabel implements DeepImmutable {
 
     private final Kind kind; // [[Class]]
 
-    private final AbstractNode node; // non-null for user defined non-Function objects
+    private AbstractNode node; // non-null for user defined non-Function objects
 
     private final HostObject hostobject; // non-null for host objects
 

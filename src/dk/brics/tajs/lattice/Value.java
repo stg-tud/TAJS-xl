@@ -28,7 +28,6 @@ import dk.brics.tajs.util.Strings;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -49,7 +48,10 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
     }
 
     public String getJavaName(){
-        return this.object_labels.stream().filter(ol->ol.javaName!="").findFirst().get().javaName;
+        if(this.object_labels.stream().filter(ol->ol.getJavaName()!="").collect(java.util.stream.Collectors.toSet()).size()>0)
+            return this.object_labels.stream().filter(ol->ol.getJavaName()!="").findFirst().get().getJavaName();
+        else
+            return "<no name known>";
     }
 
 
@@ -1459,9 +1461,11 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
     public String toString() {
         StringBuilder b = new StringBuilder();
         boolean any = false;
-        if(isJavaObject()){
-            b.append("JavaObject["+getJavaName()+"]");
-        } else if (isUnknown()) {
+        if(isJavaObject()) {
+            b.append("JavaObject[" + getJavaName() + "]" + "node: " + object_labels.stream()
+                    .findFirst().get().getNode().getIndex());
+        }
+            else if (isUnknown()) {
             b.append("?");
             any = true;
         } else if (isPolymorphic()) {

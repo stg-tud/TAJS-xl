@@ -38,15 +38,20 @@ import dk.brics.tajs.flowgraph.jsnodes.BeginForInNode;
 import dk.brics.tajs.flowgraph.jsnodes.CallNode;
 import dk.brics.tajs.flowgraph.jsnodes.CatchNode;
 import dk.brics.tajs.flowgraph.jsnodes.ConstantNode;
+import dk.brics.tajs.flowgraph.jsnodes.DeclareVariableNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndForInNode;
 import dk.brics.tajs.flowgraph.jsnodes.EventDispatcherNode;
 import dk.brics.tajs.flowgraph.jsnodes.EventDispatcherNode.Type;
 import dk.brics.tajs.flowgraph.jsnodes.IfNode;
+import dk.brics.tajs.flowgraph.jsnodes.NewObjectNode;
 import dk.brics.tajs.flowgraph.jsnodes.NopNode;
 import dk.brics.tajs.flowgraph.jsnodes.ThrowNode;
+import dk.brics.tajs.flowgraph.jsnodes.WriteVariableNode;
 import dk.brics.tajs.flowgraph.syntaticinfo.RawSyntacticInformation;
 import dk.brics.tajs.js2flowgraph.JavaScriptParser.ParseResult;
 import dk.brics.tajs.js2flowgraph.JavaScriptParser.SyntaxMesssage;
+import dk.brics.tajs.lattice.PKey;
+import dk.brics.tajs.lattice.Value;
 import dk.brics.tajs.options.Options;
 import dk.brics.tajs.util.AnalysisException;
 import dk.brics.tajs.util.Collections;
@@ -56,13 +61,7 @@ import dk.brics.tajs.util.ParseError;
 import org.apache.log4j.Logger;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 import static dk.brics.tajs.js2flowgraph.FunctionBuilderHelper.addNodeToBlock;
 import static dk.brics.tajs.js2flowgraph.FunctionBuilderHelper.makeBasicBlock;
@@ -637,6 +636,22 @@ public class FlowGraphBuilder {
         Function main = new Function(null, null, null, sourceLocationMaker.makeUnspecifiedPosition());
         FunctionAndBlockManager fab = new FunctionAndBlockManager();
         env = setupFunction(main, env, fab);
+        Function function = env.getFunction();
+        BasicBlock entry = function.getEntry();
+        BasicBlock exit = function.getOrdinaryExit();
+
+       /* if(presetValues!=null) {
+            for (Map.Entry<PKey.StringPKey, Value> presetValue : presetValues.entrySet()) {
+                entry.addNode(new DeclareVariableNode(presetValue.getKey().getStr(), function.getSourceLocation()));
+                int register = FunctionBuilder.getUsableResultRegister(env);
+                //Value value = presetValue.getValue();
+                //entry.addNode(ConstantNode.m);
+                entry.addNode(new NewObjectNode(register, function.getSourceLocation()));//, function.getSourceLocation());//ConstantNode.makeNumber(1024.0,20,function.getSourceLocation()));
+                entry.addNode(new WriteVariableNode(register, presetValue.getKey().getStr(), function.getSourceLocation()));
+                function.addVariableName(presetValue.getKey().getStr());
+            }
+        } */
+        //TODO!!!
         return new FlowGraphBuilder(env, fab);
     }
 

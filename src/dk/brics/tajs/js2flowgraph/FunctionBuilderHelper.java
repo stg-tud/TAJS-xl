@@ -33,14 +33,18 @@ import dk.brics.tajs.flowgraph.jsnodes.BeginWithNode;
 import dk.brics.tajs.flowgraph.jsnodes.BinaryOperatorNode.Op;
 import dk.brics.tajs.flowgraph.jsnodes.CallNode;
 import dk.brics.tajs.flowgraph.jsnodes.ConstantNode;
+import dk.brics.tajs.flowgraph.jsnodes.DeclareVariableNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndForInNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndLoopNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndWithNode;
 import dk.brics.tajs.flowgraph.jsnodes.ExceptionalReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.IfNode;
+import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
+import dk.brics.tajs.flowgraph.jsnodes.NewObjectNode;
 import dk.brics.tajs.flowgraph.jsnodes.ReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.ThrowNode;
 import dk.brics.tajs.flowgraph.jsnodes.UnaryOperatorNode;
+import dk.brics.tajs.flowgraph.jsnodes.WriteVariableNode;
 import dk.brics.tajs.util.AnalysisException;
 import dk.brics.tajs.util.Pair;
 
@@ -449,15 +453,12 @@ public class FunctionBuilderHelper {
         fun.setEntry(entry);
         fun.setExceptionalExit(exceptionretBB);
         fun.setOrdinaryExit(retBB);
-
         AstEnv funEnv = env.makeEnclosingFunction(fun).makeStatementLevel(true);
         Function function = funEnv.getFunction();
-
         ConstantNode returnUndefinedByDefault = ConstantNode.makeUndefined(AbstractNode.RETURN_REG, function.getSourceLocation());
         returnUndefinedByDefault.setArtificial();
         AstEnv artificialEnv = funEnv.makeStatementLevel(false);
         addNodeToBlock(returnUndefinedByDefault, function.getEntry(), artificialEnv);
-
         ReturnNode returnNode = new ReturnNode(AbstractNode.RETURN_REG, function.getSourceLocation());
         returnNode.setArtificial();
         addNodeToBlock(returnNode, function.getOrdinaryExit(), artificialEnv);

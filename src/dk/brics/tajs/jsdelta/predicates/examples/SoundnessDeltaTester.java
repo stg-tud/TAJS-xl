@@ -25,6 +25,7 @@ import dk.brics.tajs.options.Options;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 public class SoundnessDeltaTester extends AbstractSoundnessTester {
 
@@ -44,6 +45,6 @@ public class SoundnessDeltaTester extends AbstractSoundnessTester {
 
         Options.get().getArguments().add(file);
         Analysis a = Main.init(Options.get(), new AnalysisMonitor(), null);
-        Main.run(a);
+        Main.run(a, new HashMap<>());
     }
 }

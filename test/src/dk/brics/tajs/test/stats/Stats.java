@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -104,10 +105,10 @@ public class Stats {
                     Analysis a = null;
                     Throwable throwable = null;
                     try {
-                        a = Main.init(options, CompositeMonitor.make(new AnalysisMonitor(), progressMonitor, suspiciousnessMonitor, terminationMonitor, precisionMonitor), null);
+                        a = Main.init(options, CompositeMonitor.make(new AnalysisMonitor(), progressMonitor, suspiciousnessMonitor, terminationMonitor, precisionMonitor), null, new HashMap<>());
                         if (a == null)
                             throw new AnalysisException("Error during initialization");
-                        Main.run(a);
+                        Main.run(a, new HashMap<>());
                     } catch (Throwable e) {
                         if (terminationMonitor.getTerminatedEarlyMsg() == null)
                             System.out.println("Error: " + e.getMessage());

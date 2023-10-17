@@ -2141,7 +2141,7 @@ public class State implements IState<State, Context, CallEdge> {
         if (!Options.get().isLazyDisabled()) {
             if (s == null) {
                 // set everything to unknown
-                //store = newMap();
+                store = newMap();
                 writable_store = true;
                 store_default = Obj.makeUnknown();
             } else {
@@ -2159,7 +2159,7 @@ public class State implements IState<State, Context, CallEdge> {
                 }
                 // remove all-unknown objects
                 Map<ObjectLabel, Obj> oldStore = store;
-                //store = newMap();
+                store = newMap();
                 for (Map.Entry<ObjectLabel, Obj> xs : oldStore.entrySet())
                     if (!xs.getValue().isUnknown())
                         writeToStore(xs.getKey(), xs.getValue());

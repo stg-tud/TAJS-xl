@@ -1,6 +1,7 @@
 # TAJS - Type Analyzer for JavaScript
-
 Copyright 2009-2020 Aarhus University
+
+run updatesubmoduleremotes.sh to fix git submodule remotes
 
 TAJS is a dataflow analysis for JavaScript that infers type information and call graphs.
 

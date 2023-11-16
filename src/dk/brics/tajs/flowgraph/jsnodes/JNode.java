@@ -31,19 +31,16 @@ public class JNode<PointsToSet, ContextType, IntTrieSet, TACAI> extends NewObjec
      * @param result_reg The result register.
      * @param location   The source location.
      */
-    public JNode(PointsToSet pointsToSet, ContextType context, IntTrieSet defSites, TACAI tacai, int result_reg, SourceLocation location) {
+    public JNode(PointsToSet pointsToSet, ContextType context, TACAI tacai, int result_reg, SourceLocation location) {
         super(result_reg, location);
         this.pointsToSet = pointsToSet;
         this.context = context;
-        this.defSites = defSites;
         this.tacai = tacai;
     }
 
     private final PointsToSet pointsToSet;
 
     private final ContextType context;
-
-    private final IntTrieSet defSites;
 
     private final TACAI tacai;
 
@@ -62,15 +59,11 @@ public class JNode<PointsToSet, ContextType, IntTrieSet, TACAI> extends NewObjec
         return false;
     }
 
-    public PointsToSet getType() {
+    public PointsToSet getPointsToSet() {
         return pointsToSet;
     }
 
     public ContextType getContext() {return context;}
-
-    public IntTrieSet getDefSites() {
-        return defSites;
-    }
 
     public TACAI getTacai(){
         return tacai;

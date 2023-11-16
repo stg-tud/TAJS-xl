@@ -64,7 +64,7 @@ public class AnalysisSpecificMessageVarianceTester extends AbstractAnalysisVaria
         Options.get().getArguments().add(file);
         AnalysisMonitor monitoring = new AnalysisMonitor();
         Analysis a = Main.init(Options.get(), monitoring, null);
-        Main.run(a, new HashMap<>());
+        Main.run(a);
         Set<Message> messages = monitoring.getMessages();
         return messages.stream().anyMatch(message -> message.getStatus() != Message.Status.NONE && message.getMessage().contains(MESSAGE));
     }

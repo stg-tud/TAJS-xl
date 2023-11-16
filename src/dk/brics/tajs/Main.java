@@ -94,7 +94,7 @@ public class Main {
             Analysis a = init(args, null);
             if (a == null)
                 System.exit(-1);
-            run(a, new HashMap<>());
+            run(a);
             System.exit(0);
         } catch (AnalysisException e) {
             if (Options.get().isDebugOrTestEnabled()) {
@@ -360,7 +360,7 @@ public class Main {
      *
      * @throws AnalysisException if internal error
      */
-    public static void run(Analysis analysis, Map<PKey.StringPKey, Value> propertyChanges) throws AnalysisException,
+    public static void run(Analysis analysis) throws AnalysisException,
             CrossLanguageAnalysisException {
         IAnalysisMonitoring monitoring = analysis.getMonitoring();
 
@@ -368,7 +368,7 @@ public class Main {
 
         enterPhase(AnalysisPhase.ANALYSIS, monitoring);
         try {
-            boolean completed = analysis.getSolver().solve(propertyChanges);
+            boolean completed = analysis.getSolver().solve();
             if (!completed && Options.get().isTestEnabled() && !Options.get().isInspectorEnabled() && !Options.get().isAnalysisLimitationWarnOnly())
                 return; // skip scan phase if not reached fixpoint, unless in test mode (unless inspector enabled or warn-only)
         } finally {
@@ -401,7 +401,7 @@ public class Main {
                 }
             }
 
-            boolean completed = analysis.getSolver().solve(propertyChanges);
+            boolean completed = analysis.getSolver().solve();
             if (!completed && Options.get().isTestEnabled() && !Options.get().isInspectorEnabled() && !Options.get().isAnalysisLimitationWarnOnly())
                 return; // skip scan phase if not reached fixpoint, unless in test mode (unless inspector enabled or warn-only)
         } finally {

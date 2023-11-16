@@ -47,6 +47,21 @@ public class Value implements Undef, Null, Bool, Num, Str, PKeys, DeepImmutable 
                 this.object_labels.iterator().next().getKind()==Kind.JAVAOBJECT;
     }
 
+    public boolean isAlsoJavaObject(){
+        return this.object_labels!=null &&
+                this.object_labels.stream().filter(ol-> ol.getKind()==Kind.JAVAOBJECT).count()>0;
+    }
+
+    public boolean isJSJavaObject(){
+        return this.object_labels!=null && this.object_labels.size()==1 &&
+                this.object_labels.iterator().next().getKind()==Kind.JS_JAVAOBJECT;
+    }
+
+    public boolean isJSJavaTYPE(){
+        return this.object_labels!=null && this.object_labels.size()==1 &&
+                this.object_labels.iterator().next().getKind()==Kind.JS_JAVATYPE;
+    }
+
     public String getJavaName(){
         if(this.object_labels.stream().filter(ol->ol.getJavaName()!="").collect(java.util.stream.Collectors.toSet()).size()>0)
             return this.object_labels.stream().filter(ol->ol.getJavaName()!="").findFirst().get().getJavaName();

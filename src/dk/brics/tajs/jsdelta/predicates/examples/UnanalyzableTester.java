@@ -43,6 +43,6 @@ public class UnanalyzableTester extends AbstractUnanalyzableTester {
         Options.get().getSoundnessTesterOptions().setTest(false);
         Options.get().getArguments().add(file);
         Analysis a = Main.init(Options.get(), new AnalysisMonitor(), null);
-        Main.run(a, new HashMap<>());
+        Main.run(a);
     }
 }

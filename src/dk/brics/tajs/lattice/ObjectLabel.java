@@ -60,6 +60,8 @@ public final class ObjectLabel<ContextType> implements DeepImmutable {
      */
     public enum Kind {
         JAVAOBJECT("JavaObject"),
+        JS_JAVAOBJECT("JSJavaObject"),
+        JS_JAVATYPE("JSJavaType"),
         OBJECT("Object"),
         FUNCTION("Function"),
         SYMBOL("Symbol"),

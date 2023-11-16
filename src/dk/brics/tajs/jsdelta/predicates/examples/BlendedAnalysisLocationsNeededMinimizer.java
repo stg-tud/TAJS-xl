@@ -70,7 +70,7 @@ public class BlendedAnalysisLocationsNeededMinimizer extends AbstractLocationMin
 
         Options.get().getArguments().add(Paths.get(fileToAnalyze));
         Analysis a = Main.init(Options.get(), new AnalysisMonitor(), null);
-        Main.run(a, new HashMap<>());
+        Main.run(a);
     }
 
     @Override

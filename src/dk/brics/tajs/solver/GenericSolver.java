@@ -346,7 +346,7 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
      *
      * @return true if reached fixpoint
      */
-    public boolean solve(Map<PKey.StringPKey, Value> puts) {
+    public boolean solve() {
         String terminatedEarly = null;
             try {
                 // iterate until fixpoint
@@ -380,20 +380,6 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
                     current_state = state.clone();
                     analysis.getMonitoring().visitBlockTransferPre(block, current_state);
                     deps.decrementFunctionActivityLevel(BlockAndContext.makeEntry(block, context));
-                    if (global_entry_block == block) {
-                        //Map<ObjectLabel, Obj> store =
-                         //       ((State) current_state).getStore(); //.makeWritableStore();
-                        //current_state.localize(null); // use *localized* initial state
-                        for (Map.Entry<PKey.StringPKey, Value> entry : puts.entrySet()) {
-                            ObjectLabel globalObject = ObjectLabel.make(ECMAScriptObjects.GLOBAL,
-                                    ObjectLabel.Kind.OBJECT
-                            );
-                            Obj obj = ((State) current_state).getStore().get(globalObject);
-                            obj.setWritable();
-                            ((State) current_state).getStore().get(globalObject).
-                                    setProperty(entry.getKey(), entry.getValue());
-                        }
-                    }
                     if (Options.get().isIntermediateStatesEnabled())
                         if (log.isDebugEnabled())
                             log.debug("Before block transfer: " + current_state);
@@ -494,7 +480,7 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
 
     /**
      * Scans for messages. Takes one round through all nodes and all contexts without invoking <code>propagate</code>.
-     * {@link #solve(Map)} must be called first.
+     * {@link #solve()} must be called first.
      */
     public void scan() {
         if (the_analysis_lattice_element == null)
@@ -549,7 +535,7 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
 
     /**
      * Returns the analysis lattice element.
-     * {@link #solve(Map)}} must be called first.
+     * {@link #solve()}} must be called first.
      */
     public IAnalysisLatticeElement<StateType, ContextType, CallEdgeType> getAnalysisLatticeElement() {
         if (the_analysis_lattice_element == null)

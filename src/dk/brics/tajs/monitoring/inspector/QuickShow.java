@@ -55,6 +55,6 @@ public class QuickShow {
         Analysis a = Main.init(Options.get(), CompositeMonitor.make(inspector, new AnalysisTimeLimiter(30)), null);
         if (a == null)
             throw new AnalysisException("Error during initialization");
-        Main.run(a, new HashMap<>());
+        Main.run(a);
     }
 }

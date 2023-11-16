@@ -65,7 +65,7 @@ public class ExtraUndefinedVariablesMinimizer extends AbstractLocationMinimizer 
         };
         Analysis a = Main.init(Options.get(), addUndefinednessToSelectedVariables, null);
         try {
-            Main.run(a, new HashMap<>());
+            Main.run(a);
         } catch (AnalysisLimitationException e) {
             return true;
         }

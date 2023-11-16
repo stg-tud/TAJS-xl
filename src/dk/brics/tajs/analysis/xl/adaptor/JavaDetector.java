@@ -2,14 +2,16 @@ package dk.brics.tajs.analysis.xl.adaptor;
 
 import dk.brics.tajs.analysis.xl.translator.LocalTAJSAdapter;
 import dk.brics.tajs.analysis.js.NodeTransfer;
+import dk.brics.tajs.flowgraph.Function;
 import dk.brics.tajs.flowgraph.SourceLocation;
 import dk.brics.tajs.flowgraph.jsnodes.*;
-import dk.brics.tajs.lattice.ObjectLabel;
-import dk.brics.tajs.lattice.State;
-import dk.brics.tajs.lattice.Value;
+import dk.brics.tajs.lattice.*;
+import dk.brics.tajs.options.Options;
+import dk.brics.tajs.util.Pair;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JavaDetector extends NodeTransfer {
 
@@ -27,6 +29,7 @@ public class JavaDetector extends NodeTransfer {
 
     @Override
     public void visit(ReadVariableNode n) {
+
         if(n.getVariableName().equals("Java")) {
 
             //URL url = new URL("file", null, "");
@@ -56,8 +59,9 @@ public class JavaDetector extends NodeTransfer {
             if (baseValue.isJavaObject()) {
                 if(n.getResultRegister()>0) {
                     String javaFullClassName = baseValue.getJavaName();
-                    //TODO
-                    writeToRegisterAndAddMustReachDefs(n.getResultRegister(), Value.makeUndef(), n);
+                    Value fieldValue = LocalTAJSAdapter.getLocalTajsAdapter().readProperty(baseValue, propertyName);
+                    System.out.println("fieldValue: "+ fieldValue);
+                    writeToRegisterAndAddMustReachDefs(n.getResultRegister(), fieldValue, n);
                 }
                 return ;
             }
@@ -70,23 +74,13 @@ public class JavaDetector extends NodeTransfer {
         String propertyName = n.getPropertyString();
         int baseRegister = n.getBaseRegister();
         Value baseValue = c.getState().readRegister(baseRegister);
+        int valueRegister = n.getValueRegister();
+        Value assignedValue = c.getState().readRegister(valueRegister);
         if(baseValue.isJavaObject()){
-         //   System.out.println("xxxxxxx----");//"write property: "+n);
-            //TODO
-       ///     m.visitPropertyAccess(n, baseValue);
-            ///     Value coercedBaseval = Conversion.toObject(n, baseValue, c); // models exception if null/undefined
-            ///     Set<ObjectLabel> objlabels = coercedBaseval.getObjectLabels();
-            ///     Value propertyval = Value.makeStr(n.getPropertyString());
-            ///     ParallelTransfer pt = new ParallelTransfer(c);
-            ///     Set<Value> propertyvalues = singleton(propertyval);
-            //m.visitPropertyWrite(n, objlabels, propertystr);
-            ///  baseValue.makeSetter();
-           // m.visitVariableOrProperty(n, n.getPropertyString(), n.getSourceLocation(), v, c.getState().getContext(), c.getState());
-            ///     pt.complete();
-                //TODO
-            }
-            else
-                super.visit(n);
+            LocalTAJSAdapter.getLocalTajsAdapter().setProperty(baseValue, propertyName, assignedValue);
+        }
+        else
+            super.visit(n);
     }
 
     @Override
@@ -96,65 +90,83 @@ public class JavaDetector extends NodeTransfer {
 
         if(n.isConstructorCall()){
             int functionRegister = n.getFunctionRegister();
-            Value functionValue = c.getState().readRegister(functionRegister);
-            if(functionValue.isJavaObject()) {
-                String javaType = "Test";//c.getState().readRegister(argumentRegister).getStr();
-                ObjectLabel.Kind jol = ObjectLabel.Kind.JAVAOBJECT;
+            Value baseValue = c.getState().readRegister(functionRegister);
+            if(baseValue.isJSJavaTYPE()) {
+                //"Test";//c.getState().readRegister(argumentRegister).getStr();
+                String javaType = baseValue.getObjectLabels().stream().map(ol -> ol.getJavaName()).findFirst().get();
+                ObjectLabel.Kind jol = ObjectLabel.Kind.JS_JAVAOBJECT;
                 ObjectLabel ol =  ObjectLabel.make(n, jol);
                 ol.setJavaName(javaType);
-                //Set<ObjectLabel> obls = functionValue.getObjectLabels().stream().map(ol-> ol.cloneWithNode(n)).collect(Collectors.toSet());
-                //obls.stream().forEach(obl -> obl.setNode(n));
                 Value v = Value.makeObject(ol).setDontDelete().setDontEnum().setReadOnly();
-
 
                 writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v,
                         n
                 ); //Value.makeStr(javaObjectConst + javaType)
+                State newState = c.getState().clone();
+                c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
+                return;
             }
-            State newState = c.getState().clone();
-            c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
         } else if (baseRegister > 0) {
             Value baseValue = c.getState().readRegister(baseRegister);
         if(n.getNumberOfArgs()>0) {
             int argumentRegister = n.getArgRegister(0);
-                if (baseValue.isJavaObject() && functionName.equals("type")) {
+                if(baseValue.isJavaObject()){
+                if (functionName.equals("type")) {
                     String javaType = c.getState().readRegister(argumentRegister).getStr();
-                    ObjectLabel.Kind jol = ObjectLabel.Kind.JAVAOBJECT;
+                    ObjectLabel.Kind jol = ObjectLabel.Kind.JS_JAVATYPE;
                     ObjectLabel ol =  ObjectLabel.make(n, jol);
                     ol.setJavaName(javaType);
                     Value v = Value.makeObject(ol).setDontDelete().setDontEnum().setReadOnly();
-                    writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v, n); //Value.makeStr(javaObjectConst + javaType)
+                    writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v, n);
                     State newState = c.getState().clone();
                     c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
                     return;
+                } else {
+                    Value argument = c.getState().readRegister(n.getArgRegister(0));
+                    List<Value> params = new LinkedList<>();
+                    params.add(argument);
+                    Value resultValue = LocalTAJSAdapter.getLocalTajsAdapter().callFunction(baseValue,n.getPropertyString(), params);
+                    System.out.print(resultValue);
+                    if(resultValue!=Value.makeAbsent()){
+                        writeToRegisterAndAddMustReachDefs(n.getResultRegister(), resultValue,
+                                n
+                        ); //Value.makeStr(javaObjectConst + javaType)
+                        State newState = c.getState().clone();
+                        c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
+                    }
+
+                    return;
+                    //____
+                }
                 }
         }
             if (baseValue.isJavaObject()) {
                 // n.getResultRegister()=-1 -> the node is no assignment
                 if(n.getResultRegister()>0){
-                    String javaFullClassName = baseValue.getJavaName();
-                    if(baseValue.getObjectLabels().stream().findFirst().get().getNode().getIndex()>0){
-                        try {
-                            Value v = LocalTAJSAdapter.getLocalTajsAdapter().queryObject(baseValue); //TODO
-                            writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v, n);
-                        }
-                        catch (Exception e) {
-                            System.out.println("crash");
-                        }
+                    //String javaFullClassName = baseValue.getJavaName();
+                    //if(baseValue.getObjectLabels().stream().findFirst().get().getNode().getIndex()>0){
+                    //    try {
+                            //Value v = LocalTAJSAdapter.getLocalTajsAdapter().readObject(baseValue); //TODO
+                            writeToRegisterAndAddMustReachDefs(n.getResultRegister(), baseValue, n);
+                    //    }
+                    //    catch (Exception e) {
+                     //       System.out.println("crash");
+                    //    }
+                   // }
                     }
-                    else
-                        writeToRegisterAndAddMustReachDefs(n.getResultRegister(), Value.makeUndef(), n);
+                   // else
+                    //TODO    writeToRegisterAndAddMustReachDefs(n.getResultRegister(), Value.makeUndef(), n);
 
                     State newState = c.getState().clone();
                     c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
                     return;
-                } else {
+                } /*else {
                     State newState = c.getState().clone();
                     c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
                     return;
-                }
+                } */
             }
-        }
+
         super.visit(n);
     }
 
@@ -164,11 +176,32 @@ public class JavaDetector extends NodeTransfer {
 
     public void visit(WriteVariableNode n){
         String variableName = n.getVariableName();
-        Value value = c.getState().readRegister(n.getValueRegister());
-        if(value.isJavaObject()){
 
+        if(this.c.getState().getRegisters().get(n.getValueRegister())!=null && c.getState().readRegister(n.getValueRegister()).isJavaObject()){
+            Value value = c.getState().readRegister(n.getValueRegister());
+            Value v = value;// LocalTAJSAdapter.getLocalTajsAdapter().readObject(value).join(value);
+            //TODO create
            System.out.println("write variable: "+ n);
-        }
+
+            if (Options.get().isBlendedAnalysisEnabled()) {
+                v = c.getAnalysis().getBlendedAnalysis().getVariableValue(value, n, c.getState());
+                if (v.isNone()) {
+                    c.getState().setToBottom();
+                    return;
+                }
+            }
+            Pair<Set<ObjectLabel>,Boolean> objsDef = pv.writeVariable(n.getVariableName(), v, true);
+            Function f = n.getBlock().getFunction();
+            if (f.getParameterNames().contains(n.getVariableName())) { // TODO: review
+                ObjectLabel arguments_obj = ObjectLabel.make(f.getEntry().getFirstNode(), ObjectLabel.Kind.ARGUMENTS);
+                pv.writeProperty(arguments_obj, PKey.StringPKey.make(Integer.toString(f.getParameterNames().indexOf(n.getVariableName()))), v);
+            }
+            m.visitPropertyWrite(n, objsDef.getFirst(), Value.makeTemporaryStr(n.getVariableName()));
+            m.visitVariableOrProperty(n, n.getVariableName(), n.getSourceLocation(), v, c.getState().getContext(), c.getState());
+            if (objsDef.getSecond())
+                c.getState().getMustEquals().addMustEquals(n.getValueRegister(), MustEquals.getSingleton(objsDef.getFirst()), PKey.StringPKey.make(n.getVariableName()));
+
+        } else
         super.visit(n);
     }
 

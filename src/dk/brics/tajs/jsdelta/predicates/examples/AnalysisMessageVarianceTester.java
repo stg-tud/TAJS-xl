@@ -56,7 +56,7 @@ public class AnalysisMessageVarianceTester extends AbstractAnalysisVariantDiffer
         Options.get().getArguments().add(file);
         AnalysisMonitor monitoring = new AnalysisMonitor();
         Analysis a = Main.init(Options.get(), monitoring, null);
-        Main.run(a, new HashMap<>());
+        Main.run(a);
         return monitoring.getMessages();
     }
 }

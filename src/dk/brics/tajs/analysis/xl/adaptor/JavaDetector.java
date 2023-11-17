@@ -94,11 +94,11 @@ public class JavaDetector extends NodeTransfer {
             if(baseValue.isJSJavaTYPE()) {
                 //"Test";//c.getState().readRegister(argumentRegister).getStr();
                 String javaType = baseValue.getObjectLabels().stream().map(ol -> ol.getJavaName()).findFirst().get();
-                ObjectLabel.Kind jol = ObjectLabel.Kind.JS_JAVAOBJECT;
+                /* ObjectLabel.Kind jol = ObjectLabel.Kind.JS_JAVAOBJECT;
                 ObjectLabel ol =  ObjectLabel.make(n, jol);
                 ol.setJavaName(javaType);
-                Value v = Value.makeObject(ol).setDontDelete().setDontEnum().setReadOnly();
-
+                Value v = Value.makeObject(ol).setDontDelete().setDontEnum().setReadOnly();*/
+                Value v = LocalTAJSAdapter.getLocalTajsAdapter().newObject(n.getIndex(), javaType);
                 writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v,
                         n
                 ); //Value.makeStr(javaObjectConst + javaType)

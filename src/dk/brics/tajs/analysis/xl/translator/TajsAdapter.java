@@ -12,4 +12,6 @@ public interface TajsAdapter {
      Value callFunction(Value v, String FunctionName, List<Value> parameters) throws CrossLanguageAnalysisException;
 
      void setProperty(Value v, String propertyName, Value assignedValue) throws CrossLanguageAnalysisException;
+
+     Value newObject(Integer index, String javaName);
 }

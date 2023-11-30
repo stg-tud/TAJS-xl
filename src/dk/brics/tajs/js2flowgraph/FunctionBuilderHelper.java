@@ -33,18 +33,14 @@ import dk.brics.tajs.flowgraph.jsnodes.BeginWithNode;
 import dk.brics.tajs.flowgraph.jsnodes.BinaryOperatorNode.Op;
 import dk.brics.tajs.flowgraph.jsnodes.CallNode;
 import dk.brics.tajs.flowgraph.jsnodes.ConstantNode;
-import dk.brics.tajs.flowgraph.jsnodes.DeclareVariableNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndForInNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndLoopNode;
 import dk.brics.tajs.flowgraph.jsnodes.EndWithNode;
 import dk.brics.tajs.flowgraph.jsnodes.ExceptionalReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.IfNode;
-import dk.brics.tajs.flowgraph.jsnodes.JavaNode;
-import dk.brics.tajs.flowgraph.jsnodes.NewObjectNode;
 import dk.brics.tajs.flowgraph.jsnodes.ReturnNode;
 import dk.brics.tajs.flowgraph.jsnodes.ThrowNode;
 import dk.brics.tajs.flowgraph.jsnodes.UnaryOperatorNode;
-import dk.brics.tajs.flowgraph.jsnodes.WriteVariableNode;
 import dk.brics.tajs.util.AnalysisException;
 import dk.brics.tajs.util.Pair;
 

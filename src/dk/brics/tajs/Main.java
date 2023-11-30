@@ -52,7 +52,6 @@ import dk.brics.tajs.options.OptionValues;
 import dk.brics.tajs.options.Options;
 import dk.brics.tajs.options.TAJSEnvironmentConfig;
 import dk.brics.tajs.preprocessing.Babel;
-import dk.brics.tajs.solver.BlockAndContext;
 import dk.brics.tajs.solver.SolverSynchronizer;
 import dk.brics.tajs.typetesting.ITypeTester;
 import dk.brics.tajs.util.AnalysisException;

@@ -326,10 +326,6 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
         c.propagateToBasicBlock(initialState, initialState.getBasicBlock(), initialState.getContext());
     }
 
-    public void addToWorklist(BlockAndContext<ContextType> bb){
-        worklist.add(bb); //new BlockAndContext< ContextType>(new BasicBlock(), new Context()))
-    }
-
     /**
      * Runs the solver.
      *

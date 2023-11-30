@@ -453,12 +453,15 @@ public class FunctionBuilderHelper {
         fun.setEntry(entry);
         fun.setExceptionalExit(exceptionretBB);
         fun.setOrdinaryExit(retBB);
+
         AstEnv funEnv = env.makeEnclosingFunction(fun).makeStatementLevel(true);
         Function function = funEnv.getFunction();
+
         ConstantNode returnUndefinedByDefault = ConstantNode.makeUndefined(AbstractNode.RETURN_REG, function.getSourceLocation());
         returnUndefinedByDefault.setArtificial();
         AstEnv artificialEnv = funEnv.makeStatementLevel(false);
         addNodeToBlock(returnUndefinedByDefault, function.getEntry(), artificialEnv);
+
         ReturnNode returnNode = new ReturnNode(AbstractNode.RETURN_REG, function.getSourceLocation());
         returnNode.setArtificial();
         addNodeToBlock(returnNode, function.getOrdinaryExit(), artificialEnv);

@@ -13,33 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dk.brics.tajs.solver;
 
-import dk.brics.tajs.analysis.Analysis;
-import dk.brics.tajs.analysis.nativeobjects.ECMAScriptObjects;
 import dk.brics.tajs.flowgraph.AbstractNode;
 import dk.brics.tajs.flowgraph.BasicBlock;
 import dk.brics.tajs.flowgraph.FlowGraph;
 import dk.brics.tajs.flowgraph.Function;
-import dk.brics.tajs.lattice.Context;
-import dk.brics.tajs.lattice.Obj;
-import dk.brics.tajs.lattice.ObjectLabel;
-import dk.brics.tajs.lattice.PKey;
-import dk.brics.tajs.lattice.Renamings;
-import dk.brics.tajs.lattice.State;
-import dk.brics.tajs.lattice.Value;
-import dk.brics.tajs.monitoring.inspector.dataprocessing.ContextExpressionFilterer;
 import dk.brics.tajs.options.Options;
 import dk.brics.tajs.solver.IAnalysisLatticeElement.MergeResult;
 import dk.brics.tajs.util.AnalysisException;
 import dk.brics.tajs.util.AnalysisLimitationException;
-import dk.brics.tajs.util.CrossLanguageAnalysisException;
 import net.htmlparser.jericho.Source;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
@@ -348,134 +337,114 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
      */
     public boolean solve() {
         String terminatedEarly = null;
-            try {
-                // iterate until fixpoint
-                block_loop:
-                while (!worklist.isEmpty()) {
-                    if (!analysis.getMonitoring().allowNextIteration()) {
-                        terminatedEarly = "Analysis aborted";
-                        break;
-                    }
-                    if (sync != null) {
-                        if (sync.isSingleStep())
-                            if (log.isDebugEnabled())
-                                log.debug("Worklist: " + worklist);
-                        sync.waitIfSingleStep();
-                    }
-                    // pick a pending entry
-                    BlockAndContext<ContextType> p = worklist.removeNext();
-                    if (analysis.getTypeTester() != null && analysis.getTypeTester()
-                            .shouldSkipEntry(p)) {
-                        terminatedEarly = "Fixpoint solver unsoundly skipped some parts";
-                        continue;
-                    }
-                    BasicBlock block = p.getBlock();
-                    ContextType context = p.getContext();
-                    if (sync != null)
-                        sync.markActiveBlock(block);
-                    StateType state = the_analysis_lattice_element.getState(block, context);
-                    if (state == null)
-                        throw new AnalysisException();
-                    // basic block transfer
-                    current_state = state.clone();
-                    analysis.getMonitoring().visitBlockTransferPre(block, current_state);
-                    deps.decrementFunctionActivityLevel(BlockAndContext.makeEntry(block, context));
-                    if (Options.get().isIntermediateStatesEnabled())
+        try {
+            // iterate until fixpoint
+            block_loop:
+            while (!worklist.isEmpty()) {
+                if (!analysis.getMonitoring().allowNextIteration()) {
+                    terminatedEarly = "Analysis aborted";
+                    break;
+                }
+                if (sync != null) {
+                    if (sync.isSingleStep())
                         if (log.isDebugEnabled())
-                            log.debug("Before block transfer: " + current_state);
+                            log.debug("Worklist: " + worklist);
+                    sync.waitIfSingleStep();
+                }
+                // pick a pending entry
+                BlockAndContext<ContextType> p = worklist.removeNext();
+                if (analysis.getTypeTester() != null && analysis.getTypeTester().shouldSkipEntry(p)) {
+                    terminatedEarly = "Fixpoint solver unsoundly skipped some parts";
+                    continue;
+                }
+                BasicBlock block = p.getBlock();
+                ContextType context = p.getContext();
+                if (sync != null)
+                    sync.markActiveBlock(block);
+                StateType state = the_analysis_lattice_element.getState(block, context);
+                if (state == null)
+                    throw new AnalysisException();
+                // basic block transfer
+                current_state = state.clone();
+                analysis.getMonitoring().visitBlockTransferPre(block, current_state);
+                deps.decrementFunctionActivityLevel(BlockAndContext.makeEntry(block, context));
+                if (Options.get().isIntermediateStatesEnabled())
+                    if (log.isDebugEnabled())
+                        log.debug("Before block transfer: " + current_state);
+                try {
                     try {
-                        try {
-                            for (AbstractNode n : block.getNodes()) {
-                                if (Options.get().isIgnoreUnreachedEnabled()) {
-                                    if (!c.getAnalysis().getBlendedAnalysis().isReachable(n)) {
-                                        continue block_loop;
-                                    }
-                                }
-                                current_node = n;
-                                if (log.isDebugEnabled())
-                                    log.debug("Visiting node " + current_node.getIndex() + ": "
-                                            + current_node + " at "
-                                            + current_node.getSourceLocation());
-                                analysis.getMonitoring()
-                                        .visitNodeTransferPre(current_node, current_state);
-                                try {
-                                    try {
-                                        analysis.getNodeTransferFunctions().transfer(current_node);
-                                    } catch (CrossLanguageAnalysisException cae){ //------------
-                                        throw new CrossLanguageAnalysisException(cae.getMessage(),p, cae.getAnalysis());
-                                    } catch (Exception e) {
-                                        if (analysis.getTypeTester() != null
-                                                && analysis.getTypeTester()
-                                                .shouldIgnoreException(e, p))
-                                            continue block_loop;
-                                        throw e;
-                                    }
-                                } catch (AnalysisLimitationException e) {
-                                    if (e instanceof AnalysisLimitationException.AnalysisTimeException
-                                            ||
-                                            (Options.get().isTestEnabled() && !Options.get()
-                                                    .isInspectorEnabled() && !Options.get()
-                                                    .isAnalysisLimitationWarnOnly())) {
-                                        throw e;
-                                    } else {
-                                        terminatedEarly =
-                                                String.format("Stopping analysis prematurely: %s",
-                                                        e.getMessage()
-                                                );
-                                        the_analysis_lattice_element.getState(block, context)
-                                                .setToBottom(); // to avoid failing in scan phase
-                                        break block_loop;
-                                    }
-                                } finally {
-                                    analysis.getMonitoring()
-                                            .visitNodeTransferPost(current_node, current_state);
-                                }
-                                if (current_state.isBottom()) {
-                                    log.debug("No non-exceptional flow");
+                        for (AbstractNode n : block.getNodes()) {
+                            if (Options.get().isIgnoreUnreachedEnabled()) {
+                                if (!c.getAnalysis().getBlendedAnalysis().isReachable(n)) {
                                     continue block_loop;
                                 }
-                                if (Options.get().isIntermediateStatesEnabled())
-                                    if (log.isDebugEnabled())
-                                        log.debug("After node transfer: "
-                                                + current_state.toStringBrief());
                             }
-                        } finally {
-                            analysis.getMonitoring().visitBlockTransferPost(block, current_state);
-                        }
-                        // edge transfer
-                        StateType s = current_state;
-                        for (Iterator<BasicBlock> i =
-                             block.getSuccessors().iterator(); i.hasNext(); ) {
-                            BasicBlock succ = i.next();
-                            current_state = i.hasNext() ? s.clone() : s;
-                            ContextType new_context =
-                                    analysis.getEdgeTransferFunctions().transfer(block, succ);
-                            if (new_context != null) {
-                                c.propagateToBasicBlock(current_state, succ, new_context);
+                            current_node = n;
+                            if (log.isDebugEnabled())
+                                log.debug("Visiting node " + current_node.getIndex() + ": "
+                                        + current_node + " at " + current_node.getSourceLocation());
+                            analysis.getMonitoring().visitNodeTransferPre(current_node, current_state);
+                            try {
+                                try {
+                                    analysis.getNodeTransferFunctions().transfer(current_node);
+                                } catch (Exception e) {
+                                    if (analysis.getTypeTester() != null && analysis.getTypeTester().shouldIgnoreException(e, p))
+                                        continue block_loop;
+                                    throw e;
+                                }
+                            } catch (AnalysisLimitationException e) {
+                                if (e instanceof AnalysisLimitationException.AnalysisTimeException ||
+                                        (Options.get().isTestEnabled() && !Options.get().isInspectorEnabled() && !Options.get().isAnalysisLimitationWarnOnly())) {
+                                    throw e;
+                                } else {
+                                    terminatedEarly = String.format("Stopping analysis prematurely: %s", e.getMessage());
+                                    the_analysis_lattice_element.getState(block, context).setToBottom(); // to avoid failing in scan phase
+                                    break block_loop;
+                                }
+                            } finally {
+                                analysis.getMonitoring().visitNodeTransferPost(current_node, current_state);
                             }
+                            if (current_state.isBottom()) {
+                                log.debug("No non-exceptional flow");
+                                continue block_loop;
+                            }
+                            if (Options.get().isIntermediateStatesEnabled())
+                                if (log.isDebugEnabled())
+                                    log.debug("After node transfer: " + current_state.toStringBrief());
                         }
                     } finally {
-                        // process return flow and discharge incoming call edges if the function is now inactive
-                        deps.dischargeIfInactive(BlockAndContext.makeEntry(block, context));
+                        analysis.getMonitoring().visitBlockTransferPost(block, current_state);
                     }
+                    // edge transfer
+                    StateType s = current_state;
+                    for (Iterator<BasicBlock> i = block.getSuccessors().iterator(); i.hasNext(); ) {
+                        BasicBlock succ = i.next();
+                        current_state = i.hasNext() ? s.clone() : s;
+                        ContextType new_context = analysis.getEdgeTransferFunctions().transfer(block, succ);
+                        if (new_context != null) {
+                            c.propagateToBasicBlock(current_state, succ, new_context);
+                        }
+                    }
+                } finally {
+                    // process return flow and discharge incoming call edges if the function is now inactive
+                    deps.dischargeIfInactive(BlockAndContext.makeEntry(block, context));
                 }
-            } catch (AnalysisLimitationException.AnalysisTimeException e) {
-                if (Options.get().isTestEnabled() && !Options.get().isInspectorEnabled()
-                        && !Options.get().isAnalysisLimitationWarnOnly())
-                    throw e;
-                terminatedEarly = "Terminating fixpoint solver early and unsoundly!";
-            } finally {
-                analysis.getMonitoring().visitIterationDone(terminatedEarly);
-                messages_enabled = true;
             }
-            if (terminatedEarly != null) {
-                log.warn(terminatedEarly);
-                return false;
-            } else {
-                deps.assertEmpty();
-                return true;
-            }
-
+        } catch (AnalysisLimitationException.AnalysisTimeException e) {
+            if (Options.get().isTestEnabled() && !Options.get().isInspectorEnabled() && !Options.get().isAnalysisLimitationWarnOnly())
+                throw e;
+            terminatedEarly = "Terminating fixpoint solver early and unsoundly!";
+        } finally {
+            analysis.getMonitoring().visitIterationDone(terminatedEarly);
+            messages_enabled = true;
+        }
+        if (terminatedEarly != null) {
+            log.warn(terminatedEarly);
+            return false;
+        } else {
+            deps.assertEmpty();
+            return true;
+        }
     }
 
     /**
@@ -499,10 +468,8 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
                     analysis.getMonitoring().visitBlockTransferPre(block, current_state);
                     try {
                         ContextType context = me.getKey();
-                        if (global_entry_block == block){
+                        if (global_entry_block == block)
                             current_state.localize(null); // use *localized* initial state
-
-                        }
                         if (log.isDebugEnabled()) {
                             log.debug("Context: " + context);
                             if (Options.get().isIntermediateStatesEnabled())
@@ -535,7 +502,7 @@ public class GenericSolver<StateType extends IState<StateType, ContextType, Call
 
     /**
      * Returns the analysis lattice element.
-     * {@link #solve()}} must be called first.
+     * {@link #solve()} must be called first.
      */
     public IAnalysisLatticeElement<StateType, ContextType, CallEdgeType> getAnalysisLatticeElement() {
         if (the_analysis_lattice_element == null)

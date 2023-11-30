@@ -782,7 +782,7 @@ public class NodeTransfer implements NodeVisitor {
             }, c);
         } else { // getPropertyString / getPropertyRegister - like ReadPropertyNode
             Value baseval = c.getState().readRegister(n.getBaseRegister());
-                baseval = UnknownValueResolver.getRealValue(baseval, c.getState());
+            baseval = UnknownValueResolver.getRealValue(baseval, c.getState());
             if (Options.get().isBlendedAnalysisEnabled())
                 baseval = UnknownValueResolver.join(c.getAnalysis().getBlendedAnalysis().getBase(baseval, n, c.getState()), c.getState()); // we do not lose precision by joining here, only using objectlabels later
             Set<ObjectLabel> objlabels = baseval.getObjectLabels(); // the ReadPropertyNode has updated baseval to account for ToObject

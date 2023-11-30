@@ -149,7 +149,6 @@ public abstract class PartitionToken implements DeepImmutable {
             NULL("Null"),
 
             OBJ_OBJECT("OBJ_Object"),
-
             OBJ_OBJECT_JAVA("OBJ_Object_Java"),
             OBJ_FUNCTION("OBJ_Function"),
             OBJ_SYMBOL("OBJ_Symbol"),

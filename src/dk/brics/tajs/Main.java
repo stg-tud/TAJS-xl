@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dk.brics.tajs;
 
 import dk.brics.tajs.analysis.Analysis;
@@ -54,7 +55,14 @@ import dk.brics.tajs.preprocessing.Babel;
 import dk.brics.tajs.solver.BlockAndContext;
 import dk.brics.tajs.solver.SolverSynchronizer;
 import dk.brics.tajs.typetesting.ITypeTester;
-import dk.brics.tajs.util.*;
+import dk.brics.tajs.util.AnalysisException;
+import dk.brics.tajs.util.Canonicalizer;
+import dk.brics.tajs.util.Collectors;
+import dk.brics.tajs.util.Lists;
+import dk.brics.tajs.util.Loader;
+import dk.brics.tajs.util.Pair;
+import dk.brics.tajs.util.PathAndURLUtils;
+import dk.brics.tajs.util.Strings;
 import net.htmlparser.jericho.Source;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -68,7 +76,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
 
 import static dk.brics.tajs.util.Collections.newList;
 import static dk.brics.tajs.util.Collections.newSet;
@@ -150,9 +161,7 @@ public class Main {
      * @return analysis object, null if invalid input
      * @throws AnalysisException if internal error
      */
-    public static Analysis init(OptionValues options, IAnalysisMonitoring monitoring,
-            SolverSynchronizer sync, Transfer transfer, ITypeTester<Context> ttr)
-            throws AnalysisException {
+    public static Analysis init(OptionValues options, IAnalysisMonitoring monitoring, SolverSynchronizer sync, Transfer transfer, ITypeTester<Context> ttr) throws AnalysisException {
         checkValidOptions(options);
         Options.set(options);
         TAJSEnvironmentConfig.init();
@@ -360,8 +369,7 @@ public class Main {
      *
      * @throws AnalysisException if internal error
      */
-    public static void run(Analysis analysis) throws AnalysisException,
-            CrossLanguageAnalysisException {
+    public static void run(Analysis analysis) throws AnalysisException {
         IAnalysisMonitoring monitoring = analysis.getMonitoring();
 
         long time = System.currentTimeMillis();
@@ -386,41 +394,6 @@ public class Main {
         analysis.getSolver().scan();
         leavePhase(AnalysisPhase.SCAN, monitoring);
     }
-
-    public static void rerun(Analysis analysis, Map<PKey.StringPKey, Value> propertyChanges, Collection<BlockAndContext<Context>> bcs) throws AnalysisException,
-            CrossLanguageAnalysisException {
-        IAnalysisMonitoring monitoring = analysis.getMonitoring();
-
-        long time = System.currentTimeMillis();
-
-        enterPhase(AnalysisPhase.ANALYSIS, monitoring);
-        try {
-            if(!bcs.isEmpty()){
-                for(BlockAndContext bc: bcs){
-                    analysis.getSolver().addToWorklist(bc);
-                }
-            }
-
-            boolean completed = analysis.getSolver().solve();
-            if (!completed && Options.get().isTestEnabled() && !Options.get().isInspectorEnabled() && !Options.get().isAnalysisLimitationWarnOnly())
-                return; // skip scan phase if not reached fixpoint, unless in test mode (unless inspector enabled or warn-only)
-        } finally {
-            leavePhase(AnalysisPhase.ANALYSIS, monitoring);
-        }
-
-        long elapsed = System.currentTimeMillis() - time;
-        if (Options.get().isTimingEnabled())
-            log.info("Analysis finished in " + elapsed + "ms");
-
-        if (Options.get().isFlowGraphEnabled())
-            dumpFlowGraph(analysis.getSolver().getFlowGraph(), true);
-
-        enterPhase(AnalysisPhase.SCAN, monitoring);
-        analysis.getSolver().scan();
-        leavePhase(AnalysisPhase.SCAN, monitoring);
-    }
-
-
 
     /**
      * Outputs the flowgraph (in graphviz dot files).

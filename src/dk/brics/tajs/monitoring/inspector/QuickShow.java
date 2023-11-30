@@ -26,7 +26,6 @@ import dk.brics.tajs.options.Options;
 import dk.brics.tajs.util.AnalysisException;
 
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 /**
  * Quick-and-dirty tester method for {@link dk.brics.tajs.monitoring.inspector.datacollection.monitors.InspectorMonitor}.

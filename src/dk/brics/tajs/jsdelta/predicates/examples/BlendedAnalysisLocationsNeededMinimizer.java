@@ -26,7 +26,6 @@ import dk.brics.tajs.monitoring.AnalysisMonitor;
 import dk.brics.tajs.options.Options;
 
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Set;
 
 /**

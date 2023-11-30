@@ -1,4 +1,4 @@
-package dk.brics.tajs.analysis.xl.translator;
+package dk.brics.tajs.analysis.xl.adapter;
 
 public class LocalTAJSAdapter {
 

@@ -25,7 +25,6 @@ import dk.brics.tajs.options.Options;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 
 public class ClassCastExceptionTester extends AbstractExceptionTester {
 

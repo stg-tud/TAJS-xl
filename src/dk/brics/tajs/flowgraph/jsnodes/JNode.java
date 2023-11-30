@@ -19,9 +19,7 @@ package dk.brics.tajs.flowgraph.jsnodes;
 import dk.brics.tajs.flowgraph.SourceLocation;
 
 /**
- * New object node.
- * <p>
- * <i>v</i> = {}
+ * New Java node.
  */
 public class JNode<PointsToSet, ContextType, IntTrieSet, TACAI> extends NewObjectNode {
 
@@ -46,7 +44,7 @@ public class JNode<PointsToSet, ContextType, IntTrieSet, TACAI> extends NewObjec
 
     @Override
     public String toString() {
-        return "new[v" + getResultRegister() + "]";
+        return "JNode[v" + getResultRegister() + "]";
     }
 
     @Override

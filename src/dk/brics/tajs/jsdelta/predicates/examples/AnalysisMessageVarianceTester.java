@@ -26,7 +26,6 @@ import dk.brics.tajs.solver.Message;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Set;
 
 public class AnalysisMessageVarianceTester extends AbstractAnalysisVariantDifferenceTester<Set<Message>> {

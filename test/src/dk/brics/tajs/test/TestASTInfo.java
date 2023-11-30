@@ -10,7 +10,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -476,7 +475,7 @@ public class TestASTInfo {
 
     private ASTInfo makeInfo(String source) {
         SourceLocation.SyntheticLocationMaker sourceLocationMaker = new SourceLocation.SyntheticLocationMaker("synthetic");
-        FlowGraphBuilder builder = FlowGraphBuilder.makeForMain(sourceLocationMaker, new HashMap<>());
+        FlowGraphBuilder builder = FlowGraphBuilder.makeForMain(sourceLocationMaker);
         builder.transformStandAloneCode(source, sourceLocationMaker);
         builder.close();
         return builder.getAstInfo();

@@ -31,7 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -115,10 +114,10 @@ public class Misc {
         start(suffix);
         try {
             Options.get().getArguments().addAll(Arrays.stream(args).map(Paths::get).collect(Collectors.toList()));
-            Analysis a = Main.init(Options.get(), monitoring, null, new HashMap<>());
+            Analysis a = Main.init(Options.get(), monitoring, null);
             if (a == null)
                 throw new AnalysisException("Error during initialization");
-            Main.run(a, new HashMap<>());
+            Main.run(a);
         } catch (Throwable e) {
             String msg = e.getMessage();
             if (msg == null) {
@@ -279,7 +278,7 @@ public class Misc {
                 sb.append(aSrc).append("\n");
             }
             SourceLocation.SyntheticLocationMaker sourceLocationMaker = new SourceLocation.SyntheticLocationMaker("synthetic");
-            FlowGraphBuilder flowGraphBuilder = FlowGraphBuilder.makeForMain(sourceLocationMaker, new HashMap<>());
+            FlowGraphBuilder flowGraphBuilder = FlowGraphBuilder.makeForMain(sourceLocationMaker);
             flowGraphBuilder.transformStandAloneCode(sb.toString(), sourceLocationMaker);
             return flowGraphBuilder.close();
         } catch (Throwable e) {

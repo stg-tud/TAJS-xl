@@ -32,7 +32,6 @@ import dk.brics.tajs.util.AnalysisLimitationException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Set;
 
 public class ExtraUndefinedVariablesMinimizer extends AbstractLocationMinimizer {

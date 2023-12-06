@@ -110,34 +110,34 @@ public class JavaDetector extends NodeTransfer {
             Value baseValue = c.getState().readRegister(baseRegister);
         if(n.getNumberOfArgs()>0) {
             int argumentRegister = n.getArgRegister(0);
-                if(baseValue.isJavaObject()){
-                if (functionName.equals("type")) {
-                    String javaType = c.getState().readRegister(argumentRegister).getStr();
-                    ObjectLabel.Kind jol = ObjectLabel.Kind.JS_JAVATYPE;
-                    ObjectLabel ol =  ObjectLabel.make(n, jol);
-                    ol.setJavaName(javaType);
-                    Value v = Value.makeObject(ol).setDontDelete().setDontEnum().setReadOnly();
-                    writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v, n);
-                    State newState = c.getState().clone();
-                    c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
-                    return;
-                } else {
-                    Value argument = c.getState().readRegister(n.getArgRegister(0));
-                    List<Value> params = new LinkedList<>();
-                    params.add(argument);
-                    Value resultValue = LocalTAJSAdapter.getLocalTajsAdapter().callFunction(baseValue,n.getPropertyString(), params);
-                    System.out.print(resultValue);
-                    if(resultValue!=Value.makeAbsent()){
-                        writeToRegisterAndAddMustReachDefs(n.getResultRegister(), resultValue,
-                                n
-                        ); //Value.makeStr(javaObjectConst + javaType)
+                if(baseValue.isJavaObject() || baseValue.isJSJavaTYPE()){
+                    if (functionName.equals("type") && !baseValue.isJSJavaTYPE() ) {
+                        String javaType = c.getState().readRegister(argumentRegister).getStr();
+                        ObjectLabel.Kind jol = ObjectLabel.Kind.JS_JAVATYPE;
+                        ObjectLabel ol =  ObjectLabel.make(n, jol);
+                        ol.setJavaName(javaType);
+                        Value v = Value.makeObject(ol).setDontDelete().setDontEnum().setReadOnly();
+                        writeToRegisterAndAddMustReachDefs(n.getResultRegister(), v, n);
                         State newState = c.getState().clone();
                         c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
-                    }
+                        return;
+                    } else {
+                        Value argument = c.getState().readRegister(n.getArgRegister(0));
+                        List<Value> params = new LinkedList<>();
+                        params.add(argument);
+                        Value resultValue = LocalTAJSAdapter.getLocalTajsAdapter().callFunction(baseValue,n.getPropertyString(), params);
+                        System.out.print(resultValue);
+                        if(resultValue!=Value.makeAbsent()){
+                            writeToRegisterAndAddMustReachDefs(n.getResultRegister(), resultValue,
+                                    n
+                            ); //Value.makeStr(javaObjectConst + javaType)
+                            State newState = c.getState().clone();
+                            c.propagateToBasicBlock(newState, n.getBlock().getSingleSuccessor(), newState.getContext());
+                        }
 
-                    return;
-                    //____
-                }
+                        return;
+                        //____
+                    }
                 }
         }
             if (baseValue.isJavaObject()) {

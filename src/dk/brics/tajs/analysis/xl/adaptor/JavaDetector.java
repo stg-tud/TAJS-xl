@@ -56,7 +56,7 @@ public class JavaDetector extends NodeTransfer {
             return;
         else {
             Value baseValue = c.getState().readRegister(baseRegister);
-            if (baseValue.isJavaObject()) {
+            if (baseValue.isJavaObject() || baseValue.isJSJavaTYPE()) {
                 if(n.getResultRegister()>0) {
                     String javaFullClassName = baseValue.getJavaName();
                     Value fieldValue = LocalTAJSAdapter.getLocalTajsAdapter().readProperty(baseValue, propertyName);
